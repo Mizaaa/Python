@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, request
 app = Flask(__name__)
 
 @app.route("/")
@@ -6,8 +6,12 @@ def root():
  return "The default, 'root', route"
 
 @app.route('/hello/')
-def hello_world():
- return 'Hello Napier'
+def hello():
+ name = request.args.get('name', '')
+ if name == '':
+  return "no param supplied"
+ else:
+  return "Hello %s" % name
 
 @app.route('/static-example/img')
 def static_example_img():
@@ -30,6 +34,31 @@ def private():
 def login():
  return "Now we would get username $ password"
 
+@app.route("/account/", methods=['POST', 'GET'])
+def account():
+ if (request.method) == 'POST':
+  f = request.files['datafile']
+  f.save('static/uploads/upload.png')
+  return "File Uploaded"
+ else:
+  page ='''
+  <html>
+  <body>
+   <form action="" method="post" name="form" enctype=multipart/form-data">
+    <input type="file" name="datafile" />
+    <input type="submit" name="submit" id="submit"/>
+   </form>
+   </body><html>'''
+  return page, 200
+
+@app.route("/hello/<name>")
+def hello_name(name):
+ return "Hello %s" % name
+
+@app.route("/add/<int:first>/<int:second>")
+def add(first, second):
+ return str(first+second)
+
 @app.route('/force404')
 def force404():
  abort(404)
@@ -40,3 +69,4 @@ def page_not_found(error):
 
 if __name__ == "__main__":
  app.run(host='0.0.0.0', debug =True)
+
